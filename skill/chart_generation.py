@@ -284,7 +284,6 @@ class Output(BaseModel):
 def generate_chart_code(csi: Csi, input: Input) -> Output:
     sample_data = input.rows[:5] if input.rows else []
 
-    # Use Python function instead of Jinja2 to avoid unicode-escape errors
     formatted_system_prompt = get_system_prompt(input.chart_type)
 
     headers_json = json.dumps(input.headers)
@@ -330,7 +329,6 @@ def extract_python_code(response_text: str) -> str:
     filtered_lines = []
     for line in lines:
         stripped = line.strip()
-        # Skip lines with unsupported commands
         if (
             not stripped.startswith("plt.show()")
             and not stripped.startswith("plt.savefig(")

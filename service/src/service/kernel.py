@@ -39,9 +39,6 @@ class HttpKernel(Kernel):
         logger.info(f"HttpKernel initialized with URL: {url}")
 
     async def run(self, skill: Skill, token: str, input: Json) -> Json:
-        headers = {
-            "Authorization": f"Bearer {token[:20]}..."
-        }  # Log partial token for security
         url = f"{self.url}v1/skills/{skill.namespace}/{skill.name}/run"
 
         logger.debug(f"Calling skill: {skill.as_str()}")

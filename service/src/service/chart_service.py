@@ -134,7 +134,6 @@ async def _generate_chart_code(
         logger.warning("Using default chart type: bar")
         chart_type = "bar"
 
-    # Step 2: Generate chart code based on the classified type
     logger.info(f"Chart generation step 2: Generating {chart_type} chart code")
     generator_skill = Skill(namespace="playground", name="chart_generator")
     generator_input = {

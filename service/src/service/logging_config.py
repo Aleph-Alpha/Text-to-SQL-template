@@ -14,10 +14,8 @@ def configure_logging(log_level: str = "INFO", enable_file_logging: bool = False
         log_level: Log level (DEBUG, INFO, WARNING, ERROR)
         enable_file_logging: Whether to enable file logging
     """
-    # Remove default handler
     logger.remove()
 
-    # Console handler with colored format
     logger.add(
         sys.stdout,
         format="<cyan>{time:YYYY-MM-DD HH:mm:ss.SSS}</cyan> | <level>{level: <8}</level> | <white>{name}:{function}:{line} - {message}</white>",
@@ -27,7 +25,6 @@ def configure_logging(log_level: str = "INFO", enable_file_logging: bool = False
         diagnose=True,
     )
 
-    # Optional file logging
     if enable_file_logging:
         log_dir = Path("logs")
         log_dir.mkdir(exist_ok=True)
@@ -44,7 +41,6 @@ def configure_logging(log_level: str = "INFO", enable_file_logging: bool = False
             diagnose=True,
         )
 
-        # Error-only file
         logger.add(
             "logs/errors_{time:YYYY-MM-DD}.log",
             format="{time:YYYY-MM-DD HH:mm:ss.SSS} | {level: <8} | {name}:{function}:{line} - {message}",
@@ -59,5 +55,4 @@ def configure_logging(log_level: str = "INFO", enable_file_logging: bool = False
         logger.info(f"File logging enabled. Logs directory: {log_dir.absolute()}")
 
 
-# Configure on module import
 configure_logging(log_level="INFO", enable_file_logging=False)
