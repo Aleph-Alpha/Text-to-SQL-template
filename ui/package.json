@@ -47,7 +47,7 @@
     "sass-embedded": "1.86.0",
     "typescript": "5.8.2",
     "unocss": "65.4.3",
-    "vite": "6.3.3",
+    "vite": "6.4.1",
     "vite-plugin-vue-devtools": "7.7.2",
     "vitest": "3.0.9",
     "vue-tsc": "2.2.10"
