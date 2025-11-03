@@ -1,0 +1,22 @@
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+/.python-version
+
+# IDE
+.vscode/
+Todo.json
+.idea
+/ui-artifacts/*
+!ui-artifacts/.gitkeep
+
+# data 
+src/data/spider_data/
+*.zip
+
+*.pyc

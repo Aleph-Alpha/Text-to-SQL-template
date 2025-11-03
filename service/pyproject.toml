@@ -1,0 +1,74 @@
+[project]
+name = "text2sql-service"
+license = "Apache-2.0"
+version = "0.1.0"
+authors = [{ name = "Aleph Alpha Engineering", email = "engineering@aleph-alpha.com" }]
+description = "Service template"
+
+requires-python = "~=3.12"
+
+dependencies = [
+    "fastapi==0.115.8",
+    "uvicorn==0.34.0",
+    "python-liquid==1.9.4",
+    "httpx==0.28.1",
+    "pydantic>=2.11.5",
+    "pydantic-settings==2.7.1",
+    "python-multipart==0.0.18",
+    "matplotlib>=3.7.0",
+    "pandas>=2.0.0",
+    "numpy>=1.24.0",
+    "loguru>=0.7.0",
+    "pharia-skill>=0.14.1",
+    "isort>=7.0.0",
+    "black>=25.9.0",
+    "fastmcp>=0.1.0",
+    "pharia-data-sdk>=0.1.4",
+    "pharia-studio-sdk>=0.1.7",
+    "pharia-inference-sdk>=0.1.6",
+]
+
+[dependency-groups]
+dev = [
+    "mypy==1.14.1",
+    "pre-commit==4.1.0",
+    "pylama[toml]==8.4.1",
+    "pytest==8.3.4",
+    "types-setuptools==75.8.0.20250110",
+    "setuptools==75.8.0",
+    "pytest-asyncio==0.25.2",
+    "ruff==0.9.4"
+]
+
+[tool.hatch.build.targets.sdist]
+include = ["src/service"]
+
+[tool.hatch.build.targets.wheel]
+include = ["src/service"]
+
+[tool.hatch.build.targets.wheel.sources]
+"src/service" = "service"
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.pylama]
+skip = ".cache/*,*/__init__.py,.venv/*,.venv/*"
+ignore = "E501,E203"
+
+[tool.pylama.linter.pycodestyle]
+# https://black.readthedocs.io/en/stable/guides/using_black_with_other_tools.html#pycodestyle
+max_line_length = 88
+ignore = "E203,E701,E704,W503"
+
+[tool.pytest.ini_options]
+asyncio_default_fixture_loop_scope = "function"
+
+[project.scripts]
+dev = "service.main:main"
+validate_settings = "service.validate_settings:main"
