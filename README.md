@@ -2,30 +2,29 @@
 
 ## Task
 
-Build, benchmark, and deploy a **Text-to-SQL Skill**, then integrate it into a complete application and deploy to Pharia Assistant.
+Build and deploy a **complete Text-to-SQL Application with Chart Generation** to Pharia Assistant.
 
-You will create a PhariaAI skill that translates natural language to SQL queries:
+You will create two PhariaAI skills and integrate them into a full-stack application:
 
-**Your Task**: Build a **SQL Generation Skill** that:
-- Accepts natural language questions and translates them into SQL queries using RAG and few-shot learning
-- Achieves >70% accuracy on the provided test set
-- Integrates seamlessly with the pre-built backend and frontend
+1. **SQL Generation Skill**: Accepts natural language questions and translates them into SQL queries using RAG and few-shot learning
+2. **Chart Generation Skill**: Takes SQL query results and generates Python visualization code
 
 The deployed application will:
 - Accept natural language questions in a chat-like input (e.g., *"Show me the top 5 customers by total orders"*)
-- Translate questions into SQL queries using **your PhariaAI skill**
+- Translate questions into SQL queries using **your SQL generation skill**
 - Execute SQL queries against the Northwind database
 - Display results in a user-friendly table format
-- Generate interactive charts from the data (using the pre-built chart generation skill)
+- Generate interactive charts from the data using **your chart generation skill**
 - Be accessible as a **custom application inside Pharia Assistant**
 
-**Key Challenge**: Accurately translate diverse natural language queries into correct SQL statements, handling various query complexities from simple selections to complex joins and aggregations.
+**Key Challenge**: Accurately translate diverse natural language queries into correct SQL statements and generate appropriate visualizations, handling various query complexities from simple selections to complex joins and aggregations.
 
 **Deliverables**
 
 - A functioning SQL generation skill that generates valid SQL queries
-- Benchmarked solution demonstrating high accuracy on the provided test set
-- SQL skill deployed to PhariaKernel and integrated with the backend
+- Benchmarked SQL skill demonstrating >70% accuracy on the provided test set
+- A functioning chart generation skill that creates visualization code for 5 chart types
+- Both skills deployed to PhariaKernel and integrated with the backend
 - **Complete application deployed and accessible in Pharia Assistant**
 - Present your solution at the end of the workshop
 
@@ -36,8 +35,8 @@ The deployed application will:
 - **Test Dataset**: 100+ curated test examples with 5 different database schemas for evaluation in [`skill/evaluation/test-data/test_split.json`](skill/evaluation/test-data/test_split.json)
 - **Database Schemas**: Schema files for benchmarking databases in [`skill/evaluation/test-data/`](skill/evaluation/test-data/)
 - **Database Service**: [`db_service.py`](service/src/service/db_service.py) for schema extraction and query execution (pre-built)
-- **Template Starter File**: [`sql_generation.py`](skill/sql_generation.py) with Input/Output models pre-defined
-- **Pre-built Backend & Frontend**: Fully functional application - you only build the SQL generation skill!
+- **Template Starter Files**: [`sql_generation.py`](skill/sql_generation.py) and [`chart_generation.py`](skill/chart_generation.py) with Input/Output models pre-defined
+- **Pre-built Backend & Frontend**: Fully functional application - you only build the two skills!
 
 ---
 
@@ -115,10 +114,10 @@ Select the model in your flow configuration or switch interactively in the Playg
    ```
 
 2. **Review the project structure** and understand where data is located
-3. **Explore the files**:
-   - [`skill/sql_generation.py`](skill/sql_generation.py) - SQL generation skill starter (YOUR TASK)
-   - [`skill/chart_generation.py`](skill/chart_generation.py) - Chart generation skill (pre-built, ready to deploy)
-   - [`skill/chart_classifier.py`](skill/chart_classifier.py) - Chart classifier skill (pre-built, for reference or extension)
+3. **Explore the template files**:
+   - [`skill/sql_generation.py`](skill/sql_generation.py) - SQL generation skill starter (YOUR TASK #1)
+   - [`skill/chart_generation.py`](skill/chart_generation.py) - Chart generation skill starter (YOUR TASK #2)
+   - [`skill/chart_classifier.py`](skill/chart_classifier.py) - Chart classifier skill (pre-built, for reference)
    - [`skill/evaluation/test-data/`](skill/evaluation/test-data/) - Test data and schemas for benchmarking
 
 ---
@@ -306,10 +305,108 @@ skill = Skill(namespace="playground", name="sql-generator")
 
 ---
 
+---
 
-## Step 2: Integration Testing
+## Part 2: Build the Chart Generation Skill
 
-Now that your SQL skill and the chart generation skill are deployed, test the complete application locally before deploying to Pharia Assistant.
+### Required Input/Output Models
+
+Your skill **MUST** use these exact models for backend integration:
+
+```python
+from pydantic import BaseModel
+
+class Input(BaseModel):
+    chart_type: str       # One of: "bar", "line", "pie", "scatter", "histogram"
+    query: str            # The SQL query that generated the data
+    headers: list[str]    # Column names
+    rows: list[list]      # Data rows (each row is a list)
+
+class Output(BaseModel):
+    chart_code: str | None  # Python code to generate the chart, or None
+```
+
+### Step 2.1: Implement the Skill
+
+**Edit file**: [`skill/chart_generation.py`](skill/chart_generation.py)
+
+This file already has the Input/Output models and helper function `extract_python_code()` defined. You need to implement:
+
+1. **Add the `@skill` decorator and main function**:
+   ```python
+   from pharia_skill import skill, Csi, Message, ChatParams
+   
+   @skill
+   def generate_chart_code(csi: Csi, input: Input) -> Output:
+       # Your implementation here
+       pass
+   ```
+
+2. **Design chart-specific prompts** for each chart type:
+   - **Bar charts**: Identify categorical (x-axis) and numeric (y-axis) columns
+   - **Line charts**: Identify time/sequential (x-axis) and numeric (y-axis), support multi-series
+   - **Pie charts**: First column as labels, second as values (max 10 categories)
+   - **Scatter plots**: Two numeric columns
+   - **Histograms**: Single numeric column distribution
+
+3. **Build system and user prompts**:
+   - Include data context (headers, sample rows, chart type)
+   - Specify requirements: use matplotlib/pandas, no `plt.show()` or `plt.savefig()`, end with `plt.tight_layout()`
+   - Provide template examples for each chart type
+
+4. **Call the chat model**:
+   ```python
+   messages = [
+       Message.system(your_system_prompt),
+       Message.user(your_user_prompt),
+   ]
+   
+   response = csi.chat("qwen3-30b-a3b-thinking-2507-fp8", messages, ChatParams())
+   ```
+
+5. **Extract and clean Python code** using the provided `extract_python_code()` function:
+   ```python
+   chart_code = extract_python_code(response.message.content.strip())
+   ```
+
+   The function already handles:
+   - Removing `<think>...</think>` tags
+   - Removing `plt.show()`, `plt.savefig()`, `plt.close()` calls
+   - Removing unsupported parameters like `hue=` or `by=`
+
+6. **Test locally** with sample data:
+   ```bash
+   cd skill/
+   python chart_generation.py
+   ```
+
+The skill should generate code for 5 chart types:
+- Bar charts (simple and grouped)
+- Line charts (single and multi-series)
+- Pie charts
+- Scatter plots
+- Histograms
+
+**Need help?** Ask your instructor for guidance on prompt engineering for chart generation.
+
+### Step 2.2: Deploy the Skill
+
+```bash
+cd skill/
+pharia-skill build chart_generation
+pharia-skill publish chart_generation.wasm --name chart-generator
+```
+
+**Important**: Update the skill name in [`service/src/service/chart_service.py`](service/src/service/chart_service.py) (line 117):
+```python
+classifier_skill = Skill(namespace="playground", name="chart-generator")
+```
+
+---
+
+## Step 3: Integration Testing
+
+Now that both your SQL skill and chart generation skill are deployed, test the complete application locally before deploying to Pharia Assistant.
 
 ### Local Testing
 
@@ -347,7 +444,7 @@ Open Pharia Assistant and test in dev mode. This allows you to:
 
 ---
 
-## Step 3: Deploy the Complete Application to Pharia Assistant
+## Step 4: Deploy the Complete Application to Pharia Assistant
 
 This is the final step - deploying your complete application to production!
 
@@ -357,11 +454,12 @@ Ensure all environment variables are configured:
 - ✅ Root directory: [`.env`](.env)
 - ✅ Service directory: [`service/.env`](service/.env)
 - ✅ UI directory: [`ui/.env`](ui/.env)
+- ✅ Skills directory: [`skill/.env`](skill/.env)
 
 Verify:
-- ✅ SQL generation skill is built, published, and benchmarked
-- ✅ Chart generation skill is built and published
-- ✅ SQL-generation Skill name is updated in [`tools.py`](service/src/service/tools.py)
+- ✅ Both skills are built and published to PhariaKernel
+- ✅ SQL generation skill benchmarked with >70% accuracy
+- ✅ Skill names are updated in [`tools.py`](service/src/service/tools.py) and [`chart_service.py`](service/src/service/chart_service.py)
 - ✅ Application tested locally and in preview mode
 
 ### Publish and Deploy
@@ -403,10 +501,11 @@ Your deployed application allows users to:
 - Access everything seamlessly within Pharia Assistant
 
 **What you've accomplished**:
-✅ Built an SQL generation skill using RAG and few-shot learning  
-✅ Achieved high accuracy on benchmark tests  
-✅ Deployed and integrated your skill with a full-stack application  
+✅ Built two production-ready PhariaAI skills  
+✅ Achieved >70% accuracy on SQL generation benchmark tests  
+✅ Integrated both skills with a full-stack application  
 ✅ Deployed the complete system to Pharia Assistant  
+✅ Created an end-to-end data analytics solution  
 
 ---
 
@@ -422,11 +521,12 @@ Your deployed application allows users to:
 │       │           
 │       └── service/
 │           ├── db_service.py             # Database utilities (pre-built)
-│           ├── tools.py                  # ⚠️ UPDATE line 26 with SQL skill name
+│           ├── chart_service.py          # ⚠️ UPDATE line 138 with Chart generation skill name
+│           ├── tools.py                  # ⚠️ UPDATE line 26 with SQL generation skill name
 │           └── ...
 ├── skill/
 │   ├── sql_generation.py                 # ⚠️ YOUR TASK: Implement SQL generation skill
-│   ├── chart_generation.py               # Pre-built: Chart generation skill (reference)
+│   ├── chart_generation.py               # ⚠️ YOUR TASK: Implement chart generation skill
 │   ├── tool_router.py                    # Example: Skill routing (reference)
 │   ├── chart_classifier.py               # Example: Chart classification (reference)
 │   └── evaluation/                       # Test data for benchmarking
@@ -440,5 +540,14 @@ Your deployed application allows users to:
 ├── ui/                                   # Pre-built frontend (no changes needed)
 └── README.md                             # This file (workshop guide)
 ```
+
+### Where to Get Help
+
+- Ask your instructor for guidance on implementation and benchmarking
+- Check example skills: [`tool_router.py`](skill/tool_router.py), [`chart_classifier.py`](skill/chart_classifier.py)
+- Review test data: [`skill/evaluation/test-data/`](skill/evaluation/test-data/)
+- Refer to [Official Documentation](https://docs.aleph-alpha.com/)
+
+---
 
 Good luck, and happy building! 🚀
