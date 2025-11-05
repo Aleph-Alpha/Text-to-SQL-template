@@ -5,7 +5,7 @@ version = "0.1.0"
 authors = [{ name = "Aleph Alpha Engineering", email = "engineering@aleph-alpha.com" }]
 description = "Skill Example"
 
-requires-python = "~=3.11"
+requires-python = "~=3.11.0"
 
 dependencies = [
     "python-liquid==1.9.4",
