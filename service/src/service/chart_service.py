@@ -57,7 +57,7 @@ def _create_chart_execution_code(
     """Create the complete Python code to execute chart generation."""
     return f"""
 import sys
-sys.path.append('{temp_dir}')
+sys.path.append({repr(temp_dir)})
 import matplotlib
 matplotlib.use('Agg')  # Use non-interactive backend for server-side generation
 import matplotlib.pyplot as plt
@@ -87,7 +87,7 @@ else:
     {chart_code}
 
 # Save the chart with unique filename
-plt.savefig('{chart_uuid}.png', dpi=150, bbox_inches='tight', facecolor='white', edgecolor='none')
+plt.savefig({repr(chart_uuid + '.png')}, dpi=150, bbox_inches='tight', facecolor='white', edgecolor='none')
 print(f"Chart saved as {chart_uuid}.png")
 plt.close()
 """
@@ -134,6 +134,7 @@ async def _generate_chart_code(
         logger.warning("Using default chart type: bar")
         chart_type = "bar"
 
+    # Step 2: Generate chart code based on the classified type
     logger.info(f"Chart generation step 2: Generating {chart_type} chart code")
     generator_skill = Skill(namespace="playground", name="chart_generator")
     generator_input = {
@@ -231,7 +232,7 @@ async def generate_chart_image(
                 img_size_kb = len(img_data) / 1024
                 logger.debug(f"PNG image size: {img_size_kb:.2f} KB")
 
-                img_base64 = base64.b64encode(img_data).decode("utf-8")
+                img_base64 = base64.b64encode(img_data).decode("utf-8", errors="ignore")
                 base64_size_kb = len(img_base64) / 1024
                 logger.debug(f"Base64 encoded size: {base64_size_kb:.2f} KB")
 
