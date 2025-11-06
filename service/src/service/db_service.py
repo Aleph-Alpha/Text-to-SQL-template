@@ -274,27 +274,27 @@ def main():
     print(structure)
 
     print("\n")
-    print("=== SAMPLE QUERIES ===")
-    try:
-        headers, rows = db.query(
-            "SELECT COUNT(*) as table_count FROM sqlite_master WHERE type='table'"
-        )
-        print(f"Headers: {headers}")
-        print(f"Number of tables: {rows}")
+    # print("=== SAMPLE QUERIES ===")
+    # try:
+    #     headers, rows = db.query(
+    #         "SELECT COUNT(*) as table_count FROM sqlite_master WHERE type='table'"
+    #     )
+    #     print(f"Headers: {headers}")
+    #     print(f"Number of tables: {rows}")
 
-        print("\n")
-        headers, rows = db.query(
-            "SELECT CustomerID, CompanyName FROM Customers LIMIT 3"
-        )
-        print(f"Headers: {headers}")
-        print(f"First 3 customers: {rows}")
+    #     print("\n")
+    #     headers, rows = db.query(
+    #         "SELECT CustomerID, CompanyName FROM Customers LIMIT 3"
+    #     )
+    #     print(f"Headers: {headers}")
+    #     print(f"First 3 customers: {rows}")
 
-        headers, rows = db.query("SELECT * FROM Employees")
-        print(f"Headers: {headers}")
-        print(f"employees: {rows}")
+    #     headers, rows = db.query("SELECT * FROM Employees")
+    #     print(f"Headers: {headers}")
+    #     print(f"employees: {rows}")
 
-    except Exception as e:
-        print(f"Query error: {e}")
+    # except Exception as e:
+    #     print(f"Query error: {e}")
 
 
 if __name__ == "__main__":

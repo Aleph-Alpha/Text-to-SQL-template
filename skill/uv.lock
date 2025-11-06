@@ -1913,11 +1913,10 @@ wheels = [
 
 [[package]]
 name = "pharia-skill"
-version = "0.20.0"
+version = "0.19.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "componentize-py" },
-    { name = "opentelemetry-exporter-otlp-proto-http" },
     { name = "opentelemetry-sdk" },
     { name = "pharia-skill-cli" },
     { name = "pydantic" },
@@ -1927,9 +1926,9 @@ dependencies = [
     { name = "rich" },
     { name = "typer" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/2a/b6/eb1b5fe5561b2c1bd86a332a626725d524f4df0f4b5c39efc849d6ceaf4d/pharia_skill-0.20.0.tar.gz", hash = "sha256:51179c082a7d672e07d28d5963c1a0722462798503c444bc3e706eb144658a9d", size = 1170442 }
+sdist = { url = "https://files.pythonhosted.org/packages/1a/1d/f0b4bdd79a83e3e6c7b9f77381fbde5b6e46b8218fe5088031cb38b63959/pharia_skill-0.19.0.tar.gz", hash = "sha256:e73a095e89698f9685441ab3a06855b90dd3d628043a28205ee8369f37893c02", size = 1166936 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/c0/00/23ef6e17024c11be93c6be278171c84cace77ea93b699b688ffa4341afa4/pharia_skill-0.20.0-py3-none-any.whl", hash = "sha256:acd2b14c155a241c56969995c10761c083bbea0754d717f14dc603939e9d2cd4", size = 1192789 },
+    { url = "https://files.pythonhosted.org/packages/c0/db/aa654472780a92f65fe4265fba7c1a31c85a3f5b8350f80820949caa5837/pharia_skill-0.19.0-py3-none-any.whl", hash = "sha256:c8693a0f4b29e024aba400a2f58aaa4658df91c5dbbc25a90ddd21be49f8cbb0", size = 1190443 },
 ]
 
 [[package]]
@@ -2931,7 +2930,7 @@ requires-dist = [
     { name = "numpy", specifier = ">=1.24.0" },
     { name = "pandas", specifier = ">=2.0.0" },
     { name = "pharia-inference-sdk", specifier = ">=0.1.6" },
-    { name = "pharia-skill", specifier = ">=0.20.0" },
+    { name = "pharia-skill", specifier = "==0.19.0" },
     { name = "pharia-studio-sdk", specifier = ">=0.1.7" },
     { name = "python-liquid", specifier = "==1.9.4" },
 ]
